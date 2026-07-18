@@ -1,0 +1,18 @@
+services: 
+  admin:
+    image: dpage/pgadmin4:latest
+    container_name: 69-s2-admin
+    ports:
+      - 8080:80
+    environment:
+      - PGADMIN_DEFAULT_PASSWORD=12345
+      - PGADMIN_DEFAULT_EMAIL=napat-sr@rmutp.ac.th
+  db:
+    image: postgres:16-alpine
+    container_name: 69-s2-db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=B065051
+      - POSTGRES_USER=BRIGHT
+      - POSTGRES_DB=MY_DB
