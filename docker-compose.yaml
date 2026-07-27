@@ -4,7 +4,7 @@ services:
       image: postgres:16-alpine
       container_name: 69-s2-db
       ports:
-        - 5432:5432
+        - 54321:5432
       environment:
         - POSTGRES_PASSWORD=B065051
         - POSTGRES_USER=BRIGHT
@@ -13,16 +13,16 @@ services:
       - ./data-postgres:/var/lib/postgresql/data
         
   admin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4
     container_name: 69-s2-admin
     ports:
-      - 8080:80
+      - 8082:80
     environment:
       - PGADMIN_DEFAULT_PASSWORD=12345
       - PGADMIN_DEFAULT_EMAIL=napat-sr@rmutp.ac.th
 
-  volumes:
-    data-postgres:
+volumes:
+  data-postgres:
     
 
   
