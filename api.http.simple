@@ -1,19 +1,5 @@
-# REST Client
-# ข้อมูล credentials และ config ทั้งหมดโหลดจาก .env
-# ผ่าน {{$dotenv ...}}
-#
-# ลำดับการทดสอบ:
-# 1. รัน Login ก่อน
-# 2. JWT จะถูก capture จาก response
-# 3. Request ที่ต้อง Authentication จะนำ JWT ไปใช้โดยอัตโนมัติ
-
-
-# ============================================================
-# 1. Admin
-# ============================================================
-
-### 1.1 Login
-# @name adminLogin
+```http
+### Admin Login
 POST http://localhost:{{$dotenv APP_PORT}}/admin/login
 Content-Type: application/json
 
@@ -23,8 +9,9 @@ Content-Type: application/json
     "rememberMe": true
 }
 
+###
 
-### 1.2 Register
+### Admin Register
 POST http://localhost:{{$dotenv APP_PORT}}/admin/register-admin
 Content-Type: application/json
 
@@ -35,17 +22,9 @@ Content-Type: application/json
     "password": "{{$dotenv ADMIN_PASSWORD}}"
 }
 
+###
 
-### 1.3 Forgot Password
-# 🔑 Flow: ส่ง email → ระบบสร้าง reset token (hex 40 ตัว ใช้ครั้งเดียว) เก็บลง DB
-#    ตาราง admin_users (คอลัมน์ reset_password_token) และส่งลิงก์ reset ทางอีเมล
-#    (ลิงก์: /admin/auth/reset-password?code=<token>)
-# ✅ Response 204 No Content = สำเร็จ (รวมกรณี email ไม่มีในระบบ — ระบบเงียบ ป้องกันการเดา email)
-# ❌ Response 500 + SMTP 550 = user มีใน DB แต่บัญชีอีเมลไม่มีอยู่จริง (recipient doesn't exist)
-# 💡 ถ้าเมลไม่ถึง ให้ดึง token ตรงจาก DB เพื่อใช้กับ 1.4:
-#    docker exec 69-s2-db psql -U {{$dotenv POSTGRES_USER}} -d {{$dotenv POSTGRES_DB}} -t -c \
-#      "SELECT reset_password_token FROM admin_users WHERE email='{{$dotenv ADMIN_EMAIL}}';"
-# @name adminForgotPassword
+### Admin Forgot Password
 POST http://localhost:{{$dotenv APP_PORT}}/admin/forgot-password
 Content-Type: application/json
 
@@ -53,15 +32,9 @@ Content-Type: application/json
     "email": "{{$dotenv ADMIN_EMAIL}}"
 }
 
+###
 
-### 1.4 Reset Password
-# 🔑 ใส่ค่า resetPasswordToken (จากลิงก์อีเมล หรือดึงจาก DB ตามขั้นตอนใน 1.3)
-#    ลงใน ADMIN_RESET_PASSWORD_TOKEN ใน .env พร้อมกำหนดรหัสผ่านใหม่
-# ✅ Response 200 = สำเร็จ ได้ JWT + ข้อมูล user กลับมา
-# ⚠️ Token ใช้ครั้งเดียว — หลัง reset สำเร็จค่าใน DB (reset_password_token) จะถูกล้าง
-# ❌ Response 400 = token ไม่ถูกต้อง/หมดอายุ หรือ password ไม่ผ่านข้อกำหนด
-#    (อย่างน้อย 8 ตัวอักษร มีตัวเลขและตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว)
-# @name adminResetPassword
+### Admin Reset Password
 POST http://localhost:{{$dotenv APP_PORT}}/admin/reset-password
 Content-Type: application/json
 
@@ -70,10 +43,9 @@ Content-Type: application/json
     "password": "{{$dotenv ADMIN_NEW_PASSWORD}}"
 }
 
+###
 
-### 1.5 Change Password
-# ต้อง Login ผ่าน 1.1 ก่อน
-# @name adminChangePassword
+### Admin Change Password
 POST http://localhost:{{$dotenv APP_PORT}}/admin/change-password
 Content-Type: application/json
 Authorization: Bearer {{adminLogin.response.body.$.data.token}}
@@ -83,21 +55,16 @@ Authorization: Bearer {{adminLogin.response.body.$.data.token}}
     "password": "{{$dotenv ADMIN_NEW_PASSWORD}}"
 }
 
+###
 
-### 1.6 Profile
-# ต้อง Login ผ่าน 1.1 ก่อน
-# @name adminProfile
+### Admin Profile
 GET http://localhost:{{$dotenv APP_PORT}}/admin/users/me
 Content-Type: application/json
 Authorization: Bearer {{adminLogin.response.body.$.data.token}}
 
+###
 
-# ============================================================
-# 2. User
-# ============================================================
-
-### 2.1 Login
-# @name userLogin
+### User Login
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/local/
 Content-Type: application/json
 
@@ -106,8 +73,9 @@ Content-Type: application/json
     "password": "{{$dotenv USER_PASSWORD}}"
 }
 
+###
 
-### 2.2 Register
+### User Register
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/local/register
 Content-Type: application/json
 
@@ -117,14 +85,9 @@ Content-Type: application/json
     "password": "{{$dotenv USER_PASSWORD}}"
 }
 
+###
 
-### 2.3 Forgot Password
-# 🔑 Flow: ส่ง email → ระบบสร้าง reset code (hex 128 ตัว ใช้ครั้งเดียว) เก็บลง DB
-#    ตาราง up_users (คอลัมน์ reset_password_token) และส่ง code ทางอีเมล
-# ✅ Response 200 = สำเร็จ ({"ok":true}) — รวมกรณี email ไม่มีในระบบ (กันการเดา email)
-# ❌ Response 500 + SMTP 550 = user มีใน DB แต่บัญชีอีเมลไม่มีอยู่จริง (recipient doesn't exist)
-# ⚠️ ต่างจาก Admin: ฝั่ง User ใช้ field "code" (ไม่ใช่ resetPasswordToken) และ code ยาว 128 ตัว
-# @name userForgotPassword
+### User Forgot Password
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/forgot-password
 Content-Type: application/json
 
@@ -132,15 +95,9 @@ Content-Type: application/json
     "email": "{{$dotenv USER_EMAIL}}"
 }
 
+###
 
-### 2.4 Reset Password
-# 🔑 ใส่ค่า code (จากอีเมล หรือดึงจาก DB ตาราง up_users ตามวิธีเดียวกับ 1.3)
-#    ลงใน USER_RESET_PASSWORD_CODE ใน .env พร้อมกำหนดรหัสผ่านใหม่
-# ✅ Response 200 = สำเร็จ ได้ JWT + ข้อมูล user กลับมา
-# ⚠️ Code ใช้ครั้งเดียว — หลัง reset สำเร็จค่าใน DB จะถูกล้าง
-# ⚠️ ต้องมี passwordConfirmation (ค่าเดียวกับ password ใหม่) — ระบบบังคับ
-# ❌ Response 400 = code ไม่ถูกต้อง/หมดอายุ หรือ password ไม่ผ่านข้อกำหนด
-# @name userResetPassword
+### User Reset Password
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/reset-password
 Content-Type: application/json
 
@@ -150,11 +107,9 @@ Content-Type: application/json
     "passwordConfirmation": "{{$dotenv USER_NEW_PASSWORD}}"
 }
 
+###
 
-### 2.5 Change Password
-# ต้อง Login ผ่าน 2.1 ก่อน
-# ⚠️ ต้องมี passwordConfirmation (ค่าเดียวกับ password ใหม่) — ระบบบังคับ
-# @name userChangePassword
+### User Change Password
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/change-password
 Content-Type: application/json
 Authorization: Bearer {{userLogin.response.body.$.jwt}}
@@ -165,10 +120,10 @@ Authorization: Bearer {{userLogin.response.body.$.jwt}}
     "passwordConfirmation": "{{$dotenv USER_NEW_PASSWORD}}"
 }
 
+###
 
-### 2.6 Profile
-# ต้อง Login ผ่าน 2.1 ก่อน
-# @name userProfile
+### User Profile
 GET http://localhost:{{$dotenv APP_PORT}}/api/users/me
 Content-Type: application/json
 Authorization: Bearer {{userLogin.response.body.$.jwt}}
+```

@@ -1,5 +1,6 @@
 .env
+api.http
 data-postgres
 data-pgadmin
 data-app
-api.http
+วิธีทดสอบและการใช้งาน.md
