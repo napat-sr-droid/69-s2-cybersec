@@ -137,6 +137,7 @@ Content-Type: application/json
 #    ลงใน USER_RESET_PASSWORD_CODE ใน .env พร้อมกำหนดรหัสผ่านใหม่
 # ✅ Response 200 = สำเร็จ ได้ JWT + ข้อมูล user กลับมา
 # ⚠️ Code ใช้ครั้งเดียว — หลัง reset สำเร็จค่าใน DB จะถูกล้าง
+# ⚠️ ต้องมี passwordConfirmation (ค่าเดียวกับ password ใหม่) — ระบบบังคับ
 # ❌ Response 400 = code ไม่ถูกต้อง/หมดอายุ หรือ password ไม่ผ่านข้อกำหนด
 # @name userResetPassword
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/reset-password
@@ -144,12 +145,14 @@ Content-Type: application/json
 
 {
     "code": "{{$dotenv USER_RESET_PASSWORD_CODE}}",
-    "password": "{{$dotenv USER_NEW_PASSWORD}}"
+    "password": "{{$dotenv USER_NEW_PASSWORD}}",
+    "passwordConfirmation": "{{$dotenv USER_NEW_PASSWORD}}"
 }
 
 
 ### 2.5 Change Password
 # ต้อง Login ผ่าน 2.1 ก่อน
+# ⚠️ ต้องมี passwordConfirmation (ค่าเดียวกับ password ใหม่) — ระบบบังคับ
 # @name userChangePassword
 POST http://localhost:{{$dotenv APP_PORT}}/api/auth/change-password
 Content-Type: application/json
@@ -157,7 +160,8 @@ Authorization: Bearer {{userLogin.response.body.$.jwt}}
 
 {
     "currentPassword": "{{$dotenv USER_PASSWORD}}",
-    "password": "{{$dotenv USER_NEW_PASSWORD}}"
+    "password": "{{$dotenv USER_NEW_PASSWORD}}",
+    "passwordConfirmation": "{{$dotenv USER_NEW_PASSWORD}}"
 }
 
 
