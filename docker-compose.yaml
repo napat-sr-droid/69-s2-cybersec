@@ -36,4 +36,8 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - ./data-app:/srv/app
+      # Override: wrap email send in try/catch inside users-permissions forgot-password
+      # (the image has no real SMTP provider, so a failed send previously returned 500).
+      # The reset code is still stored in the DB, so /api/auth/reset-password works end-to-end.
+      - ./docker-override/auth.js:/opt/node_modules/@strapi/plugin-users-permissions/server/controllers/auth.js:ro
   
