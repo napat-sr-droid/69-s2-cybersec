@@ -4,3 +4,5 @@ data-postgres
 data-pgadmin
 data-app
 วิธีทดสอบและการใช้งาน.md
+docker-override
+docker-compose.override.yaml
