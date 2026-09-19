@@ -1,13 +1,22 @@
-# REST
+# ============================================================
+# REST Client — ตัวอย่างคำขอ (example only)
+# ⚠️ ค่าใน body/URL ด้านล่างเป็นค่าตัวอย่าง (fake) เท่านั้น
+#    ตรงกับค่าตัวอย่างใน env.simple — ต้องแก้เป็นค่าจริงก่อนรัน
+# ✅ ไฟล์จริงที่ใช้กับระบบ: api.http (โหลดค่าจาก .env ผ่าน {{$dotenv ...}})
+# ✅ ตัวอย่าง .env: env.simple (คัดลอกไปเป็น .env แล้วใส่ค่าจริง)
+# ลำดับการทดสอบ: รัน Login ก่อน เพื่อให้ JWT ถูก capture และนำไปใช้ใน request ถัดไปโดยอัตโนมัติ
+# ============================================================
+
 # 1. Admin
-# 1.1 Login
+### 1.1 Login
+# @name adminLogin
 POST http://localhost:9092/admin/login
 Content-Type: application/json
 
 {
-    "email": "",
-    "password": "",
-    "rememberMe": false
+    "email": "admin@example.com",
+    "password": "Admin_Example123",
+    "rememberMe": true
 }
 
 ### 1.2 Register
@@ -15,53 +24,107 @@ POST http://localhost:9092/admin/register-admin
 Content-Type: application/json
 
 {
-    "firstname": "",
-    "lastname": "",
-    "email": "",
-    "password": ""
+    "firstname": "admin",
+    "lastname": "example",
+    "email": "admin@example.com",
+    "password": "Admin_Example123"
 }
 
-### 1.3 Forgot-password
+### 1.3 Forgot Password
+# @name adminForgotPassword
 POST http://localhost:9092/admin/forgot-password
 Content-Type: application/json
 
 {
-    "email": ""
+    "email": "admin@example.com"
 }
 
-### 1.4 Profile
+### 1.4 Reset Password
+# ตัวอย่าง: ใส่ resetPasswordToken (จากลิงก์ในอีเมลที่ระบบส่งให้) ตรงๆ ด้านล่าง
+# @name adminResetPassword
+POST http://localhost:9092/admin/reset-password
+Content-Type: application/json
+
+{
+    "resetPasswordToken": "example_reset_token_from_email",
+    "password": "Admin_Example456"
+}
+
+### 1.5 Change Password
+# เปลี่ยนรหัสผ่านตอน login อยู่แล้ว (ต้องรัน 1.1 Login ก่อน เพื่อให้ token ถูกใช้งานอัตโนมัติ)
+# ⚠️ หมายเหตุ: ใน image prawee/strapi route /admin/change-password ถูกตัดออก
+#    (ตอบ Method Not Allowed) — ใช้ forgot-password + reset-password แทน
+# @name adminChangePassword
+POST http://localhost:9092/admin/change-password
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
+
+{
+    "currentPassword": "Admin_Example123",
+    "password": "Admin_Example456"
+}
+
+### 1.6 Profile
+# @name adminProfile
 GET http://localhost:9092/admin/users/me
-Authorization: Bearer {YOUR_JWT_TOKEN}
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.$.data.token}}
 
 # 2 User
 ### 2.1 Login
+# @name userLogin
 POST http://localhost:9092/api/auth/local/
 Content-Type: application/json
 
 {
-    "identifier": "",
-    "password": ""
+    "identifier": "user@example.com",
+    "password": "user123456"
 }
 
-### 2.2 Register 
+### 2.2 Register
 POST http://localhost:9092/api/auth/local/register
 Content-Type: application/json
 
 {
-    "email": "",
-    "username": "",
-    "password": ""
+    "email": "user@example.com",
+    "username": "example_user",
+    "password": "user123456"
 }
 
-### 2.3 Forgot password
+### 2.3 Forgot Password
+# @name userForgotPassword
 POST http://localhost:9092/api/auth/forgot-password
 Content-Type: application/json
 
 {
-    "email": ""
+    "email": "user@example.com"
 }
 
-### 2.4 Profile
-GET http://localhost:9092/api/users/me
-Authorization: Bearer 
+### 2.4 Reset Password
+# ตัวอย่าง: ใส่ code จากอีเมลที่ระบบส่งให้ ตรงๆ ด้านล่าง
+# @name userResetPassword
+POST http://localhost:9092/api/auth/reset-password
 Content-Type: application/json
+
+{
+    "code": "example_reset_code_from_email",
+    "password": "User_Example456"
+}
+
+### 2.5 Change Password
+# เปลี่ยนรหัสผ่านตอน login อยู่แล้ว (ต้องรัน 2.1 Login ก่อน เพื่อให้ token ถูกใช้งานอัตโนมัติ)
+# @name userChangePassword
+POST http://localhost:9092/api/auth/change-password
+Content-Type: application/json
+Authorization: Bearer {{userLogin.response.body.$.jwt}}
+
+{
+    "currentPassword": "user123456",
+    "password": "User_Example456"
+}
+
+### 2.6 Profile
+# @name userProfile
+GET http://localhost:9092/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{userLogin.response.body.$.jwt}}
